@@ -6,9 +6,9 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { api } from "@/convex/_generated/api";
 import { Id } from "@/convex/_generated/dataModel";
 import { useMutation, useQuery } from "convex/react";
+import _ from "lodash-es";
 import dynamic from "next/dynamic";
 import { useMemo } from "react";
-
 interface DocumentIdPageProps {
   params: {
     documentId: Id<"documents">;
@@ -17,9 +17,13 @@ interface DocumentIdPageProps {
 
 const DocumentIdPage = ({ params }: DocumentIdPageProps) => {
   const Editor = useMemo(
-    () => dynamic(() => import("@/components/editor"), { ssr: false }),
+    () => dynamic(() => import("@/components/tiptap"), { ssr: false }),
     [],
   );
+  // const Editor = useMemo(
+  //   () => dynamic(() => import("@/components/editor"), { ssr: false }),
+  //   [],
+  // );
 
   const document = useQuery(api.documents.getById, {
     documentId: params.documentId,
@@ -43,12 +47,12 @@ const DocumentIdPage = ({ params }: DocumentIdPageProps) => {
     );
   }
 
-  const onChange = (content: string) => {
+  const onChange = _.debounce((content: string) => {
     update({
       id: params.documentId,
       content,
     });
-  };
+  }, 300);
 
   if (document === null) {
     return <div>Not found</div>;
